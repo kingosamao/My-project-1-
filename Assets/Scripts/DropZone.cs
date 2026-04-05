@@ -1,16 +1,14 @@
 using Photon.Pun;
-using System.Linq;
-using Unity.Burst.CompilerServices;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
 public class DropZone : MonoBehaviour, IDropHandler
 {
-    [Header("IdentificaÁ„o da Zona")]
-    public int zoneID; // 0: M„o P1, 1: Suporte P1, 2: Ataque P1, 3: M„o P2, etc.
+    [Header("Identifica√ß√£o da Zona")]
+    public int zoneID; // 0: M√£o P1, 1: Suporte P1, 2: Ataque P1, 3: M√£o P2, etc.
     private GameManager gameManager;
 
-    [Header("ConfiguraÁ„o da zona")]
+    [Header("Configura√ß√£o da zona")]
     public bool isAttackZone = false;
     public bool isSupportZone = false;
     public int maxCards = 4;
@@ -27,15 +25,17 @@ public class DropZone : MonoBehaviour, IDropHandler
         card.transform.SetParent(card.GetComponent<CardDragHandler>().originalParent);
     }
 
-    // A VERS√O REESCRITA E CORRIGIDA
+    // A VERS√ÉO REESCRITA E CORRIGIDA
     public void OnDrop(PointerEventData eventData)
     {
         GameObject dropped = eventData.pointerDrag;
+        if (dropped == null) return;
+
         CardDisplay display = dropped.GetComponent<CardDisplay>();
         CardDragHandler dragHandler = dropped.GetComponent<CardDragHandler>();
         if (display == null || display.card == null || dragHandler == null) return;
 
-        // Se n„o È meu turno, eu n„o posso fazer NADA.
+        // Se n√£o √© meu turno, eu n√£o posso fazer NADA.
         if (!gameManager.isMyTurn()) return;
 
         bool vindoDaMao = display.currentLocation == CardDisplay.CardLocation.InHand;
@@ -43,20 +43,20 @@ public class DropZone : MonoBehaviour, IDropHandler
 
         if (vindoDaMao)
         {
-            // === ETAPA DE VALIDA«√O LOCAL ===
+            // === ETAPA DE VALIDA√á√ÉO LOCAL ===
 
-            // 1. ValidaÁ„o de Limite de Zona
+            // 1. Valida√ß√£o de Limite de Zona
             if (transform.childCount >= maxCards)
             {
                 Debug.Log("Limite de cartas na zona.");
-                ReturnToHand(dropped); // Usa a funÁ„o para devolver
+                ReturnToHand(dropped); // Usa a fun√ß√£o para devolver
                 return;
             }
 
-            // 2. ValidaÁ„o de Alvo (se necess·rio)
-            // ... (seu cÛdigo de prÈ-check de alvo) ...
+            // 2. Valida√ß√£o de Alvo (se necess√°rio)
+            // ... (seu c√≥digo de pr√©-check de alvo) ...
 
-            // 3. ValidaÁ„o de Custo de PA
+            // 3. Valida√ß√£o de Custo de PA
             int custo = display.card.cost;
             if (!gameManager.CanAfford(custo))
             {
@@ -65,30 +65,30 @@ public class DropZone : MonoBehaviour, IDropHandler
                 return;
             }
 
-            // === ETAPA DE EXECU«√O ===
-            // Se TODAS as validaÁıes locais passaram...
+            // === ETAPA DE EXECU√á√ÉO ===
+            // Se TODAS as valida√ß√µes locais passaram...
 
             // 1. ANUNCIA a jogada para a rede.
             gameManager.AnnounceCardPlay(display.card.cardName, this.zoneID, gameManager.isMasterClientTurn);
             gameManager.GetComponent<PhotonView>().RPC("RPC_RemoveCardFromOpponentHand", RpcTarget.All);
-            // 2. CONSOME a carta da m„o (destrÛi o GameObject que veio da m„o).
+            // 2. CONSOME a carta da m√£o (destr√≥i o GameObject que veio da m√£o).
             Destroy(dropped);
         }
-        else // Lembre-se de adicionar um RPC para sincronizar o movimento tambÈm no futuro.
+        else // Lembre-se de adicionar um RPC para sincronizar o movimento tamb√©m no futuro.
         {
-            // Regra 1: N„o pode mover no mesmo turno que entrou
+            // Regra 1: N√£o pode mover no mesmo turno que entrou
             if (display.turnoQueEntrou == gameManager.turnoAtual)
             {
-                Debug.Log($"'{display.card.cardName}' n„o pode ser movido no turno em que foi invocado.");
-                // N„o faz ReturnToHand, pois isso mandaria a carta para a m„o do jogador.
-                // Simplesmente n„o faz nada, a carta voltar· para o lugar original por padr„o.
+                Debug.Log($"'{display.card.cardName}' n√£o pode ser movido no turno em que foi invocado.");
+                // N√£o faz ReturnToHand, pois isso mandaria a carta para a m√£o do jogador.
+                // Simplesmente n√£o faz nada, a carta voltar√° para o lugar original por padr√£o.
                 return;
             }
 
-            // Regra 2: N„o pode mover mais de uma vez
+            // Regra 2: N√£o pode mover mais de uma vez
             if (display.jaMoveuNesseTurno)
             {
-                Debug.Log($"'{display.card.cardName}' j· foi movido neste turno.");
+                Debug.Log($"'{display.card.cardName}' j√° foi movido neste turno.");
                 return;
             }
 
@@ -97,11 +97,8 @@ public class DropZone : MonoBehaviour, IDropHandler
             dropped.transform.SetParent(transform);
         }
 
-                // ATUALIZA«√O FINAL DE LAYOUT
-                originalParent?.GetComponent<PerspectiveZoneLayout>()?.UpdateLayout();
-                GetComponent<PerspectiveZoneLayout>()?.UpdateLayout();
-            }
-        }
-    
-
-
+                // ATUALIZAÔøΩÔøΩO FINAL DE LAYOUT
+        originalParent?.GetComponent<PerspectiveZoneLayout>()?.UpdateLayout();
+        GetComponent<PerspectiveZoneLayout>()?.UpdateLayout();
+    }
+}

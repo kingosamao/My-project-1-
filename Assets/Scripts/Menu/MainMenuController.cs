@@ -4,14 +4,16 @@ using UnityEngine.SceneManagement; // Essencial para mudar de cena
 
 public class MainMenuController : MonoBehaviour
 {
-    [Header("Painéis do Menu")]
+    [Header("PainÃ©is do Menu")]
     public GameObject mainMenuPanel;
     public GameObject playPanel;
     public GameObject optionsPanel;
+    [Header("Online")]
+    public ConnectionManager connectionManager;
 
     void Start()
     {
-        // Garante que apenas o painel principal esteja visível no início
+        // Garante que apenas o painel principal esteja visÃ­vel no inÃ­cio
         ShowMainMenu();
     }
 
@@ -22,7 +24,7 @@ public class MainMenuController : MonoBehaviour
         optionsPanel.SetActive(false);
     }
 
-    // --- Funções dos Botões do Painel Principal ---
+    // --- FunÃ§Ãµes dos BotÃµes do Painel Principal ---
     public void OnPlayButtonClicked()
     {
         mainMenuPanel.SetActive(false);
@@ -44,10 +46,10 @@ public class MainMenuController : MonoBehaviour
     public void OnQuitButtonClicked()
     {
         Debug.Log("Saindo do jogo...");
-        Application.Quit(); // Só funciona no jogo compilado
+        Application.Quit(); // SÃ³ funciona no jogo compilado
     }
 
-    // --- Funções do Painel de Jogar ---
+    // --- FunÃ§Ãµes do Painel de Jogar ---
     public void OnPlayAIButtonClicked()
     {
         // Carrega a cena principal do jogo
@@ -56,11 +58,21 @@ public class MainMenuController : MonoBehaviour
 
     public void OnPlayOnlineButtonClicked()
     {
-        Debug.Log("Funcionalidade online a ser implementada!");
-        // Aqui viria a lógica para entrar em um lobby online
+        if (connectionManager == null)
+        {
+            connectionManager = FindFirstObjectByType<ConnectionManager>();
+        }
+
+        if (connectionManager == null)
+        {
+            Debug.LogError("ConnectionManager nÃ£o encontrado na cena. NÃ£o foi possÃ­vel iniciar o jogo online.");
+            return;
+        }
+
+        connectionManager.ConnectToServer();
     }
 
-    // A função de "Voltar" é a mesma para os dois sub-painéis
+    // A funÃ§Ã£o de "Voltar" Ã© a mesma para os dois sub-painÃ©is
     public void OnBackButtonClicked()
     {
         ShowMainMenu();

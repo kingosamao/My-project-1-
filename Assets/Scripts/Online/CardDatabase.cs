@@ -1,24 +1,24 @@
 using UnityEngine;
 using System.Collections.Generic;
-using System.Linq; // Essencial para a função Find
+using System.Linq; // Essencial para a funÃ§Ã£o Find
 
 [CreateAssetMenu(fileName = "CardDatabase", menuName = "Card Database")]
 public class CardDatabase : ScriptableObject
 {
-    // Listas com TODAS as cartas possíveis no seu jogo.
+    // Listas com TODAS as cartas possÃ­veis no seu jogo.
     public List<Card> allNormalCards;
     public List<ActionCard> allActionCards;
 
-    // Função pública para encontrar uma carta normal pelo nome.
+    // FunÃ§Ã£o pÃºblica para encontrar uma carta normal pelo nome.
     public Card FindNormalCardByName(string cardName)
     {
         if (string.IsNullOrEmpty(cardName) || allNormalCards == null)
             return null;
         string cleanedCardName = cardName.Trim();
-        return allNormalCards.FirstOrDefault(c => c.cardName.Trim() == cardName);
+        return allNormalCards.FirstOrDefault(c => c.cardName.Trim() == cleanedCardName);
     }
 
-    // Função pública para encontrar uma carta de ação pelo nome.
+    // FunÃ§Ã£o pÃºblica para encontrar uma carta de aÃ§Ã£o pelo nome.
     public ActionCard FindActionCardByName(string cardName)
     {
         if (string.IsNullOrEmpty(cardName) || allActionCards == null)

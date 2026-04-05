@@ -13,7 +13,7 @@ using UnityEngine.SceneManagement;
 
 public class GameManager : MonoBehaviourPunCallbacks
 {
-    [Header("Bases de Dados e ReferÍncias")]
+    [Header("Bases de Dados e Refer√™ncias")]
     public CardDatabase cardDatabase;
     public DeckManager deckManager;
     public GameObject actionCardPrefab;
@@ -22,7 +22,7 @@ public class GameManager : MonoBehaviourPunCallbacks
     public Transform opponentActionCardSlot;
 
 
-    // --- Vari·veis de estado de combate ---
+    // --- Vari√°veis de estado de combate ---
     public CardDisplay attacker { get; private set; }
     public CardDisplay defender { get; private set; }
     public enum TurnPhase { Inicial, Principal, Batalha, Final }
@@ -37,7 +37,7 @@ public class GameManager : MonoBehaviourPunCallbacks
     [Header("UI de Fim de Jogo")]
     public GameObject endGamePanel;
     public TextMeshProUGUI resultMessageText;
-    public Button backToMenuButton; // ReferÍncia ao bot„o
+    public Button backToMenuButton; // Refer√™ncia ao bot√£o
 
     [Header("UI")]
     public Button nextPhaseButton;
@@ -55,7 +55,7 @@ public class GameManager : MonoBehaviourPunCallbacks
     public int turnoAtual { get; private set; } = 1;
     public bool isMasterClientTurn { get; private set; } = true;
 
-    // --- Vari·veis Locais ---
+    // --- Vari√°veis Locais ---
     public bool isOnlineMatch { get; private set; }
     private int playerVida, oponenteVida;
     private int playerActionPoints, opponentActionPoints;
@@ -90,7 +90,7 @@ public class GameManager : MonoBehaviourPunCallbacks
             endGamePanel.SetActive(false);
         }
 
-        // Configura o clique do bot„o
+        // Configura o clique do bot√£o
         if (backToMenuButton != null)
         {
             backToMenuButton.onClick.AddListener(GoBackToMenu);
@@ -98,7 +98,7 @@ public class GameManager : MonoBehaviourPunCallbacks
     }
     public override void OnPlayerPropertiesUpdate(Player targetPlayer, Hashtable changedProps)
     {
-        // Se o jogo j· comeÁou, ignora todas as outras atualizaÁıes de propriedades.
+        // Se o jogo j√° come√ßou, ignora todas as outras atualiza√ß√µes de propriedades.
         if (gameHasStarted) return;
 
         if (changedProps.ContainsKey("ActionCardName") && AllPlayersReady())
@@ -135,37 +135,64 @@ public class GameManager : MonoBehaviourPunCallbacks
     [PunRPC]
     void SetupGameRPC()
     {
-        // --- ADICIONE ESTA LINHA DE SEGURAN«A ---
-        if (gameHasStarted && !PhotonNetwork.IsMasterClient) return; // Se eu n„o sou o master e j· recebi este RPC, ignoro.
+        // --- ADICIONE ESTA LINHA DE SEGURAN√áA ---
+        if (gameHasStarted && !PhotonNetwork.IsMasterClient) return; // Se eu n√£o sou o master e j√° recebi este RPC, ignoro.
 
-        // No cliente que recebe, tambÈm liga o "disjuntor".
+        // No cliente que recebe, tamb√©m liga o "disjuntor".
         gameHasStarted = true;
 
-        Debug.Log("RPC: Todos os jogadores est„o prontos. Configurando o jogo para todos (CHAMADA ⁄NICA).");
+        Debug.Log("RPC: Todos os jogadores est√£o prontos. Configurando o jogo para todos (CHAMADA √öNICA).");
 
         // Define as Action Cards de cada jogador
-        string myCardName = (string)PhotonNetwork.LocalPlayer.CustomProperties["ActionCardName"];
-        string opponentCardName = (string)PhotonNetwork.PlayerListOthers[0].CustomProperties["ActionCardName"];
+        string myCardName = PhotonNetwork.LocalPlayer.CustomProperties.TryGetValue("ActionCardName", out object myCardNameObj)
+            ? myCardNameObj as string
+            : null;
+        string opponentCardName = PhotonNetwork.PlayerListOthers[0].CustomProperties.TryGetValue("ActionCardName", out object opponentCardNameObj)
+            ? opponentCardNameObj as string
+            : null;
+
         myActionCard = cardDatabase.FindActionCardByName(myCardName);
         if (myActionCard == null)
         {
-            Debug.LogError($"N√O FOI POSSÕVEL ENCONTRAR MINHA ACTION CARD: '{myCardName}'. Usando a primeira da lista como fallback.");
-            myActionCard = cardDatabase.allActionCards[0]; // Usa uma carta padr„o para n„o travar
+            Debug.LogError($"N√ÉO FOI POSS√çVEL ENCONTRAR MINHA ACTION CARD: '{myCardName}'. Usando a primeira da lista como fallback.");
+            myActionCard = cardDatabase.allActionCards[0]; // Usa uma carta padr√£o para n√£o travar
         }
         opponentActionCard = cardDatabase.FindActionCardByName(opponentCardName);
         if (opponentActionCard == null)
         {
-            Debug.LogError($"N√O FOI POSSÕVEL ENCONTRAR A ACTION CARD DO OPONENTE: '{opponentCardName}'. Usando a primeira da lista como fallback.");
+            Debug.LogError($"N√ÉO FOI POSS√çVEL ENCONTRAR A ACTION CARD DO OPONENTE: '{opponentCardName}'. Usando a primeira da lista como fallback.");
             opponentActionCard = cardDatabase.allActionCards[0];
         }
 
         // Define os Decks de cada jogador
-        string[] myDeckNames = (string[])PhotonNetwork.LocalPlayer.CustomProperties["DeckCardNames"];
-        string[] opponentDeckNames = (string[])PhotonNetwork.PlayerListOthers[0].CustomProperties["DeckCardNames"];
+        string[] myDeckNames = PhotonNetwork.LocalPlayer.CustomProperties.TryGetValue("DeckCardNames", out object myDeckObj)
+            ? myDeckObj as string[]
+            : null;
+        string[] opponentDeckNames = PhotonNetwork.PlayerListOthers[0].CustomProperties.TryGetValue("DeckCardNames", out object opponentDeckObj)
+            ? opponentDeckObj as string[]
+            : null;
 
-        // Cria as listas de cartas
-        List<Card> myDeck = myDeckNames.Select(name => cardDatabase.FindNormalCardByName(name)).ToList();
-        List<Card> opponentDeck = opponentDeckNames.Select(name => cardDatabase.FindNormalCardByName(name)).ToList();
+        // Cria as listas de cartas com fallback para deck padr√£o.
+        List<Card> myDeck = (myDeckNames ?? System.Array.Empty<string>())
+            .Select(name => cardDatabase.FindNormalCardByName(name))
+            .Where(card => card != null)
+            .ToList();
+        List<Card> opponentDeck = (opponentDeckNames ?? System.Array.Empty<string>())
+            .Select(name => cardDatabase.FindNormalCardByName(name))
+            .Where(card => card != null)
+            .ToList();
+
+        if (myDeck.Count == 0 && deckManager != null && deckManager.defaultPlayerDeck != null)
+        {
+            myDeck = deckManager.defaultPlayerDeck.cards.Where(card => card != null).ToList();
+            Debug.LogWarning("Deck local n√£o encontrado nas propriedades de rede. Usando deck padr√£o.");
+        }
+
+        if (opponentDeck.Count == 0 && deckManager != null && deckManager.defaultPlayerDeck != null)
+        {
+            opponentDeck = deckManager.defaultPlayerDeck.cards.Where(card => card != null).ToList();
+            Debug.LogWarning("Deck do oponente n√£o encontrado nas propriedades de rede. Usando deck padr√£o.");
+        }
 
         // MANDA o DeckManager se preparar com AMBOS os decks
         deckManager.SetupDecks(myDeck, opponentDeck);
@@ -175,7 +202,7 @@ public class GameManager : MonoBehaviourPunCallbacks
         oponenteVida = opponentActionCard.startingLife;
         SetupActionCardDisplays();
 
-        // Compra a m„o inicial UMA VEZ AQUI
+        // Compra a m√£o inicial UMA VEZ AQUI
         deckManager.DrawInitialHand();
 
         // Master Client define o estado do primeiro turno
@@ -211,7 +238,7 @@ public class GameManager : MonoBehaviourPunCallbacks
     [PunRPC]
     void RequestAdvancePhaseRPC()
     {
-        if (!PhotonNetwork.IsMasterClient) return; // SeguranÁa: Apenas o Master Client executa
+        if (!PhotonNetwork.IsMasterClient) return; // Seguran√ßa: Apenas o Master Client executa
 
         TurnPhase nextPhase = currentPhase;
         bool endOfTurn = false;
@@ -241,7 +268,7 @@ public class GameManager : MonoBehaviourPunCallbacks
     {
         ResetarStatusDeTurno();
 
-        // LÛgica de Compra de Turno (M„o inicial J¡ FOI COMPRADA)
+        // L√≥gica de Compra de Turno (M√£o inicial J√Å FOI COMPRADA)
         bool shouldDraw = isMyTurn() ? (turnoAtual > 1 || !isMasterClientTurn) : (turnoAtual > 1 || isMasterClientTurn);
         if (isMyTurn() && shouldDraw)
         {
@@ -249,11 +276,11 @@ public class GameManager : MonoBehaviourPunCallbacks
             // if (isMyTurn()) { deckManager.DrawCards(1, true); }
 
             // DEPOIS (CORRIGIDO):
-            // Enviamos um RPC com a informaÁ„o de quem deve comprar.
+            // Enviamos um RPC com a informa√ß√£o de quem deve comprar.
             photonView.RPC("RPC_DrawTurnCard", RpcTarget.All, isMasterClientTurn);
         }
 
-        // LÛgica de Ganho de PA
+        // L√≥gica de Ganho de PA
         playerActionPoints = isMyTurn() ? myActionCard.paPerTurn : 0;
         opponentActionPoints = isMyTurn() ? 0 : opponentActionCard.paPerTurn;
     }
@@ -262,7 +289,7 @@ public class GameManager : MonoBehaviourPunCallbacks
     {
        
 
-        // … meu turno de comprar?
+        // √â meu turno de comprar?
         bool amIDrawing = (isForMasterClient == PhotonNetwork.IsMasterClient);
 
         // O DeckManager local de CADA jogador executa a compra para o deck apropriado.
@@ -289,13 +316,13 @@ public class GameManager : MonoBehaviourPunCallbacks
             return;
         }
 
-        // Se passamos na checagem, o resto do cÛdigo pode ser executado com seguranÁa.
+        // Se passamos na checagem, o resto do c√≥digo pode ser executado com seguran√ßa.
         if (nextPhaseButton != null) nextPhaseButton.interactable = isMyTurn();
 
         phaseText.text = $"Fase: {currentPhase}";
         if (PhotonNetwork.CurrentRoom.PlayerCount > 1)
         {
-            turnCounterText.text = $"Turno {turnoAtual} ó {(isMyTurn() ? PhotonNetwork.LocalPlayer.NickName : PhotonNetwork.PlayerListOthers[0].NickName)}";
+            turnCounterText.text = $"Turno {turnoAtual} ¬ó {(isMyTurn() ? PhotonNetwork.LocalPlayer.NickName : PhotonNetwork.PlayerListOthers[0].NickName)}";
         }
 
         playerVidaTexto.text = $"{playerVida}";
@@ -310,22 +337,22 @@ public class GameManager : MonoBehaviourPunCallbacks
     }
     private void CheckForGameOver()
     {
-        // Se o jogo j· acabou, n„o faz nada.
+        // Se o jogo j√° acabou, n√£o faz nada.
         if (endGamePanel.activeSelf) return;
 
         bool gameOver = false;
         string message = "";
 
-        // Verifica se a vida de alguÈm chegou a zero ou menos
+        // Verifica se a vida de algu√©m chegou a zero ou menos
         if (playerVida <= 0)
         {
             gameOver = true;
-            message = "VocÍ Perdeu!";
+            message = "Voc√™ Perdeu!";
         }
         else if (oponenteVida <= 0)
         {
             gameOver = true;
-            message = "VocÍ Venceu!";
+            message = "Voc√™ Venceu!";
         }
 
         // Se o jogo acabou...
@@ -339,7 +366,7 @@ public class GameManager : MonoBehaviourPunCallbacks
     {
         if (endGamePanel != null)
         {
-            // Desativa o bot„o de passar de fase para impedir mais aÁıes
+            // Desativa o bot√£o de passar de fase para impedir mais a√ß√µes
             if (nextPhaseButton != null)
             {
                 nextPhaseButton.interactable = false;
@@ -354,7 +381,7 @@ public class GameManager : MonoBehaviourPunCallbacks
 
     public void GoBackToMenu()
     {
-        // Se estivermos em uma partida online, È importante desconectar da sala.
+        // Se estivermos em uma partida online, √© importante desconectar da sala.
         if (PhotonNetwork.IsConnected)
         {
             Debug.Log("Saindo da sala do Photon...");
@@ -367,7 +394,7 @@ public class GameManager : MonoBehaviourPunCallbacks
     }
     public override void OnLeftRoom()
     {
-        Debug.Log("SaÌda da sala confirmada. Voltando para o menu.");
+        Debug.Log("Sa√≠da da sala confirmada. Voltando para o menu.");
         SceneManager.LoadScene("MainMenu");
     }
 
@@ -378,12 +405,12 @@ public class GameManager : MonoBehaviourPunCallbacks
         if (PhotonNetwork.IsMasterClient)
         {
             int newID = nextMatchID;
-            nextMatchID++; // Incrementa para o prÛximo
+            nextMatchID++; // Incrementa para o pr√≥ximo
 
             // Envia o RPC com o novo ID.
             photonView.RPC("RPC_SyncPlayCard", RpcTarget.All, cardName, zoneID, cardWasPlayedByMaster, newID);
         }
-        else // Se eu N√O sou o Master Client...
+        else // Se eu N√ÉO sou o Master Client...
         {
             // ...eu envio um RPC APENAS para o Master Client, pedindo para ele fazer a jogada por mim.
             photonView.RPC("RequestPlayCardRPC", RpcTarget.MasterClient, cardName, zoneID, cardWasPlayedByMaster);
@@ -392,7 +419,7 @@ public class GameManager : MonoBehaviourPunCallbacks
     [PunRPC]
     void RequestPlayCardRPC(string cardName, int zoneID, bool cardWasPlayedByMaster)
     {
-        // Esta funÁ„o sÛ È executada no Master Client.
+        // Esta fun√ß√£o s√≥ √© executada no Master Client.
         // Ele simplesmente pega o pedido e o retransmite para todos com um ID oficial.
         Debug.Log($"Master Client recebeu um pedido para jogar '{cardName}'. Retransmitindo para todos.");
         AnnounceCardPlay(cardName, zoneID, cardWasPlayedByMaster);
@@ -402,16 +429,16 @@ public class GameManager : MonoBehaviourPunCallbacks
     {
         Card cardData = cardDatabase.FindNormalCardByName(cardName);
 
-        // A checagem mais importante: Se a carta for uma EstratÈgia, N√O faÁa nada.
-        // Os efeitos dela j· foram sincronizados por outros RPCs (compra de carta, dano, etc.)
+        // A checagem mais importante: Se a carta for uma Estrat√©gia, N√ÉO fa√ßa nada.
+        // Os efeitos dela j√° foram sincronizados por outros RPCs (compra de carta, dano, etc.)
         bool playedByOpponent = (cardWasPlayedByMaster != PhotonNetwork.IsMasterClient);
-        // --- L”GICA DE TRADU«√O DE ID ---
-        int targetZoneID = zoneID; // ComeÁa com o ID original
+        // --- L√ìGICA DE TRADU√á√ÉO DE ID ---
+        int targetZoneID = zoneID; // Come√ßa com o ID original
         if (playedByOpponent)
         {
-            // ...nÛs traduzimos os IDs.
-            // Se ele jogou na zona 1 dele, para mim È a 4.
-            // Se ele jogou na zona 2 dele, para mim È a 5.
+            // ...n√≥s traduzimos os IDs.
+            // Se ele jogou na zona 1 dele, para mim √© a 4.
+            // Se ele jogou na zona 2 dele, para mim √© a 5.
             switch (zoneID)
             {
                 case 1: // Support do Jogador -> Support do Oponente
@@ -420,7 +447,7 @@ public class GameManager : MonoBehaviourPunCallbacks
                 case 2: // Attack do Jogador -> Attack do Oponente
                     targetZoneID = 5;
                     break;
-                    // Adicione outros mapeamentos se necess·rio
+                    // Adicione outros mapeamentos se necess√°rio
             }
         }
         DropZone targetZone = FindObjectsOfType<DropZone>().FirstOrDefault(z => z.zoneID == targetZoneID);
@@ -432,24 +459,24 @@ public class GameManager : MonoBehaviourPunCallbacks
             playerActionPoints -= cardData.cost;
         }
 
-        // --- L”GICA DE EXECU«√O ---
+        // --- L√ìGICA DE EXECU√á√ÉO ---
         DropZone.DonoDaZona effectOwner = wasPlayedByMe ? DropZone.DonoDaZona.Jogador : DropZone.DonoDaZona.Oponente;
 
-        // Se for uma EstratÈgia, ela n„o È criada no campo.
-        if (cardData.type == CardType.EstratÈgia)
+        // Se for uma Estrat√©gia, ela n√£o √© criada no campo.
+        if (cardData.type == CardType.Estrat√©gia)
         {
-            Debug.Log($"Executando EstratÈgia Sincronizada: {cardData.cardName}");
-            // Criamos uma carta tempor·ria apenas para passar como referÍncia para a habilidade.
+            Debug.Log($"Executando Estrat√©gia Sincronizada: {cardData.cardName}");
+            // Criamos uma carta tempor√°ria apenas para passar como refer√™ncia para a habilidade.
             GameObject tempCardGO = new GameObject("TempCardForEffect");
             CardDisplay tempDisplay = tempCardGO.AddComponent<CardDisplay>();
             tempDisplay.card = cardData;
 
-            // Ativa a habilidade e envia ao cemitÈrio.
+            // Ativa a habilidade e envia ao cemit√©rio.
             cardData.ability?.Activate(this, tempDisplay, effectOwner);
             bool wasOwnedByMaster = (effectOwner == DropZone.DonoDaZona.Jogador);
             SendToGraveyard(tempDisplay, wasOwnedByMaster);
         }
-        else // Se for um Animal, ele È criado no campo.
+        else // Se for um Animal, ele √© criado no campo.
         {
             GameObject cardGO = Instantiate(cardPrefab, targetZone.transform);
             CardDisplay display = cardGO.GetComponent<CardDisplay>();
@@ -473,13 +500,13 @@ public class GameManager : MonoBehaviourPunCallbacks
     {
         if (PhotonNetwork.IsMasterClient != isMasterClientTurn)
         {
-            // Encontra o objeto da m„o do oponente
+            // Encontra o objeto da m√£o do oponente
             Transform opponentHand = FindObjectOfType<DeckManager>()?.opponentHandArea;
             if (opponentHand != null && opponentHand.childCount > 0)
             {
-                // DestrÛi a primeira carta que encontrar na m„o do oponente.
-                // Como n„o sabemos qual carta foi, remover a primeira (ou a ˙ltima)
-                // È a aproximaÁ„o visual mais simples.
+                // Destr√≥i a primeira carta que encontrar na m√£o do oponente.
+                // Como n√£o sabemos qual carta foi, remover a primeira (ou a √∫ltima)
+                // √© a aproxima√ß√£o visual mais simples.
                 Destroy(opponentHand.GetChild(0).gameObject);
             }
         }
@@ -510,7 +537,7 @@ public class GameManager : MonoBehaviourPunCallbacks
     {
         Debug.Log($"RPC Recebido: Sincronizando vida. Master: {masterClientLife}, Cliente: {otherClientLife}");
 
-        // Cada jogador define sua vida e a do oponente com base em quem È o Master Client.
+        // Cada jogador define sua vida e a do oponente com base em quem √© o Master Client.
         if (PhotonNetwork.IsMasterClient)
         {
             this.playerVida = masterClientLife;
@@ -524,7 +551,7 @@ public class GameManager : MonoBehaviourPunCallbacks
     }
     public void ClearAttacker()
     {
-        // Limpa a referÍncia do atacante de forma segura.
+        // Limpa a refer√™ncia do atacante de forma segura.
         this.attacker = null;
     }
     private bool AllPlayersReady()
@@ -533,6 +560,7 @@ public class GameManager : MonoBehaviourPunCallbacks
         foreach (var player in PhotonNetwork.PlayerList)
         {
             if (!player.CustomProperties.ContainsKey("ActionCardName")) return false;
+            if (!player.CustomProperties.ContainsKey("DeckCardNames")) return false;
         }
         return true;
     }
@@ -566,7 +594,7 @@ public class GameManager : MonoBehaviourPunCallbacks
 
         if (card.jaAtacouNesseTurno)
         {
-            Debug.Log("Este animal j· atacou neste turno.");
+            Debug.Log("Este animal j√° atacou neste turno.");
             return;
         }
 
@@ -588,7 +616,7 @@ public class GameManager : MonoBehaviourPunCallbacks
 
         if (taunters.Any() && !selectedDefender.card.hasTaunt)
         {
-            Debug.Log("VocÍ deve atacar uma criatura com Provocar!");
+            Debug.Log("Voc√™ deve atacar uma criatura com Provocar!");
             return;
         }
 
@@ -600,7 +628,7 @@ public class GameManager : MonoBehaviourPunCallbacks
         }
         else
         {
-            Debug.LogError("Atacante ou Defensor n„o possui um matchID v·lido!");
+            Debug.LogError("Atacante ou Defensor n√£o possui um matchID v√°lido!");
         }
 
         attacker = null;
@@ -608,13 +636,13 @@ public class GameManager : MonoBehaviourPunCallbacks
     [PunRPC]
     private void RPC_ResolveBattle(int attackerMatchID, int defenderMatchID)
     {
-        // Cada cliente encontra as cartas em sua prÛpria cena usando os IDs de rede.
+        // Cada cliente encontra as cartas em sua pr√≥pria cena usando os IDs de rede.
         CardDisplay battleAttacker = FindObjectsOfType<CardDisplay>().FirstOrDefault(c => c.matchID == attackerMatchID);
         CardDisplay battleDefender = FindObjectsOfType<CardDisplay>().FirstOrDefault(c => c.matchID == defenderMatchID);
 
         if (battleAttacker == null || battleDefender == null)
         {
-            Debug.LogError($"RPC_ResolveBattle falhou: n„o foi possÌvel encontrar uma das cartas pelos matchIDs.");
+            Debug.LogError($"RPC_ResolveBattle falhou: n√£o foi poss√≠vel encontrar uma das cartas pelos matchIDs.");
             return;
         }
 
@@ -623,7 +651,7 @@ public class GameManager : MonoBehaviourPunCallbacks
         int danoDoAtacante = battleAttacker.card.attack;
         battleDefender.card.health -= danoDoAtacante;
 
-        // Dano de retaliaÁ„o
+        // Dano de retalia√ß√£o
         DropZone zonaDoDefensor = battleDefender.GetComponentInParent<DropZone>();
         if (zonaDoDefensor != null && zonaDoDefensor.isAttackZone)
         {
@@ -633,7 +661,7 @@ public class GameManager : MonoBehaviourPunCallbacks
 
         battleAttacker.jaAtacouNesseTurno = true;
 
-        // VerificaÁ„o de morte
+        // Verifica√ß√£o de morte
         if (battleDefender.card.health <= 0)
         {
 
@@ -659,7 +687,7 @@ public class GameManager : MonoBehaviourPunCallbacks
                 return true;
             }
         }
-        else // … o oponente
+        else // √â o oponente
         {
             if (opponentActionPoints >= cost)
             {
@@ -681,18 +709,18 @@ public class GameManager : MonoBehaviourPunCallbacks
         Card cardData = cardDatabase.FindNormalCardByName(cardName);
         if (cardData == null) return;
 
-        // A L”GICA DE PONTO DE VISTA CORRIGIDA:
-        // A carta era minha? A resposta È SIM se o remetente tem o mesmo "status de master" que eu.
+        // A L√ìGICA DE PONTO DE VISTA CORRIGIDA:
+        // A carta era minha? A resposta √© SIM se o remetente tem o mesmo "status de master" que eu.
         bool wasMyCard = (wasSentByMaster == PhotonNetwork.IsMasterClient);
 
         if (wasMyCard)
         {
-            Debug.Log($"Sincronizando '{cardName}' para o MEU cemitÈrio.");
+            Debug.Log($"Sincronizando '{cardName}' para o MEU cemit√©rio.");
             playerGraveyard.Add(cardData);
         }
         else
         {
-            Debug.Log($"Sincronizando '{cardName}' para o cemitÈrio do meu OPONENTE.");
+            Debug.Log($"Sincronizando '{cardName}' para o cemit√©rio do meu OPONENTE.");
             opponentGraveyard.Add(cardData);
         }
     }
@@ -700,18 +728,18 @@ public class GameManager : MonoBehaviourPunCallbacks
     {
         if (cardDisplay == null) return;
 
-        // A lÛgica de ⁄ltimo Suspiro precisa saber o dono local
+        // A l√≥gica de √öltimo Suspiro precisa saber o dono local
         bool amIOwner = (wasOwnedByMaster == PhotonNetwork.IsMasterClient);
         if (amIOwner)
         {
             if (cardDisplay.card.deathrattleAbility != null)
             {
-                // O 'owner' aqui È sempre 'Jogador' do ponto de vista local
+                // O 'owner' aqui √© sempre 'Jogador' do ponto de vista local
                 cardDisplay.card.deathrattleAbility.Activate(this, cardDisplay, DropZone.DonoDaZona.Jogador);
             }
         }
 
-        // O RPC agora recebe a informaÁ„o absoluta 'wasOwnedByMaster'.
+        // O RPC agora recebe a informa√ß√£o absoluta 'wasOwnedByMaster'.
         if (PhotonNetwork.IsMasterClient)
         {
             photonView.RPC("RPC_SendToGraveyard", RpcTarget.All, cardDisplay.card.cardName, wasOwnedByMaster);
@@ -722,19 +750,19 @@ public class GameManager : MonoBehaviourPunCallbacks
     public void AnnounceAbilityActivation(int sourceCardMatchID, int targetCardMatchID)
     {
         // Envia um RPC para todos com os IDs da carta fonte e da carta alvo.
-        // Se n„o houver alvo, targetCardMatchID ser· -1.
+        // Se n√£o houver alvo, targetCardMatchID ser√° -1.
         photonView.RPC("RPC_ExecuteAbility", RpcTarget.All, sourceCardMatchID, targetCardMatchID);
     }
 
-    // ESTE … O RPC QUE FAZ A M¡GICA
+    // ESTE √â O RPC QUE FAZ A M√ÅGICA
     [PunRPC]
     private void RPC_ExecuteAbility(int sourceCardMatchID, int targetCardMatchID)
     {
-        // 1. Encontra a carta fonte em cada m·quina.
+        // 1. Encontra a carta fonte em cada m√°quina.
         CardDisplay sourceCard = FindObjectsOfType<CardDisplay>().FirstOrDefault(c => c.matchID == sourceCardMatchID);
         if (sourceCard == null)
         {
-            Debug.LogError($"RPC_ExecuteAbility n„o encontrou a carta fonte com ID {sourceCardMatchID}");
+            Debug.LogError($"RPC_ExecuteAbility n√£o encontrou a carta fonte com ID {sourceCardMatchID}");
             return;
         }
 
@@ -745,21 +773,21 @@ public class GameManager : MonoBehaviourPunCallbacks
         var sourceZone = sourceCard.GetComponentInParent<DropZone>();
         DropZone.DonoDaZona owner = sourceZone.dono;
 
-        Debug.Log($"Sincronizando ativaÁ„o da habilidade '{ability.name}' da carta '{sourceCard.card.cardName}'.");
+        Debug.Log($"Sincronizando ativa√ß√£o da habilidade '{ability.name}' da carta '{sourceCard.card.cardName}'.");
 
-        // 3. Executa cada aÁ„o da habilidade.
+        // 3. Executa cada a√ß√£o da habilidade.
         foreach (var action in ability.actions)
         {
             if (action.requiresTarget)
             {
-                // Se a aÁ„o precisa de alvo, encontra o alvo pelo ID.
+                // Se a a√ß√£o precisa de alvo, encontra o alvo pelo ID.
                 CardDisplay targetCard = FindObjectsOfType<CardDisplay>().FirstOrDefault(c => c.matchID == targetCardMatchID);
                 if (targetCard != null)
                 {
                     action.ExecuteAction(this, sourceCard, owner, targetCard);
                 }
             }
-            else // AÁ„o sem alvo
+            else // A√ß√£o sem alvo
             {
                 action.ExecuteAction(this, sourceCard, owner);
             }
@@ -768,20 +796,20 @@ public class GameManager : MonoBehaviourPunCallbacks
     public bool CheckForValidTargets(CardAction action, DropZone.DonoDaZona owner)
     {
         // Encontra TODAS as cartas com CardDisplay na cena.
-        // Nota: Em um jogo muito grande, isso pode ser lento, mas para o nosso escopo È perfeito.
+        // Nota: Em um jogo muito grande, isso pode ser lento, mas para o nosso escopo √© perfeito.
         var allPotentialTargets = FindObjectsOfType<CardDisplay>();
 
         foreach (var potentialTarget in allPotentialTargets)
         {
-            // Usa a mesma lÛgica de validaÁ„o que j· criamos na CardAction.
+            // Usa a mesma l√≥gica de valida√ß√£o que j√° criamos na CardAction.
             if (action.IsValidTarget(potentialTarget, owner))
             {
-                // Se encontrou UM alvo que seja v·lido, j· podemos parar e dizer que a aÁ„o È possÌvel.
+                // Se encontrou UM alvo que seja v√°lido, j√° podemos parar e dizer que a a√ß√£o √© poss√≠vel.
                 return true;
             }
         }
 
-        // Se o loop terminar e n„o encontrou nenhum alvo, a aÁ„o È impossÌvel.
+        // Se o loop terminar e n√£o encontrou nenhum alvo, a a√ß√£o √© imposs√≠vel.
         return false;
     }
     public void EnterTargetingMode(CardAction action, CardDisplay sourceCard, DropZone.DonoDaZona owner)
@@ -799,9 +827,9 @@ public class GameManager : MonoBehaviourPunCallbacks
 
         if (actionWaitingForTarget.IsValidTarget(target, ownerOfTargetingAction))
         {
-            Debug.Log($"Alvo v·lido selecionado: {target.card.cardName}. Executando aÁ„o.");
+            Debug.Log($"Alvo v√°lido selecionado: {target.card.cardName}. Executando a√ß√£o.");
 
-            // Se for v·lido, executa a aÁ„o e sai do modo de mira.
+            // Se for v√°lido, executa a a√ß√£o e sai do modo de mira.
             AnnounceAbilityActivation(sourceCardForTargeting.matchID, target.matchID);
             isTargetingModeActive = false;
             actionWaitingForTarget = null;
@@ -809,8 +837,8 @@ public class GameManager : MonoBehaviourPunCallbacks
         }
         else
         {
-            // Se o alvo N√O for v·lido, informa o jogador e continua no modo de mira.
-            Debug.LogWarning($"Alvo inv·lido! {target.card.cardName} n„o È um alvo v·lido para esta habilidade.");
+            // Se o alvo N√ÉO for v√°lido, informa o jogador e continua no modo de mira.
+            Debug.LogWarning($"Alvo inv√°lido! {target.card.cardName} n√£o √© um alvo v√°lido para esta habilidade.");
             // (Opcional: Adicionar um feedback sonoro ou visual de "erro")
         }
     }
@@ -830,7 +858,7 @@ public class GameManager : MonoBehaviourPunCallbacks
         {
             ProcessDirectAttack(attackerMatchID);
         }
-        else // Se n„o sou, eu envio um RPC pedindo para o Master Client processar.
+        else // Se n√£o sou, eu envio um RPC pedindo para o Master Client processar.
         {
             photonView.RPC("RPC_RequestDirectAttack", RpcTarget.MasterClient, attackerMatchID);
         }
@@ -838,32 +866,32 @@ public class GameManager : MonoBehaviourPunCallbacks
     [PunRPC]
     private void RPC_RequestDirectAttack(int attackerMatchID)
     {
-        // Esta funÁ„o sÛ È executada no Master Client.
+        // Esta fun√ß√£o s√≥ √© executada no Master Client.
         ProcessDirectAttack(attackerMatchID);
     }
     private void ProcessDirectAttack(int attackerMatchID)
     {
-        if (!PhotonNetwork.IsMasterClient) return; // SeguranÁa
+        if (!PhotonNetwork.IsMasterClient) return; // Seguran√ßa
 
         CardDisplay directAttacker = FindObjectsOfType<CardDisplay>().FirstOrDefault(c => c.matchID == attackerMatchID);
         if (directAttacker == null)
         {
-            Debug.LogError($"ProcessDirectAttack falhou: n„o encontrou a carta com ID {attackerMatchID}");
+            Debug.LogError($"ProcessDirectAttack falhou: n√£o encontrou a carta com ID {attackerMatchID}");
             return;
         }
 
         // O Master Client calcula o dano e o novo estado de vida.
         int dano = directAttacker.card.attack;
 
-        // Determina quem est· sendo atacado
+        // Determina quem est√° sendo atacado
         int newMasterLife = this.playerVida;
         int newClientLife = this.oponenteVida;
 
-        if (isMasterClientTurn) // Se o Master est· atacando
+        if (isMasterClientTurn) // Se o Master est√° atacando
         {
             newClientLife -= dano;
         }
-        else // Se o Cliente est· atacando
+        else // Se o Cliente est√° atacando
         {
             newMasterLife -= dano;
         }
@@ -871,7 +899,7 @@ public class GameManager : MonoBehaviourPunCallbacks
         // O Master Client anuncia o NOVO ESTADO DE VIDA para todos.
         photonView.RPC("RPC_SyncHealth", RpcTarget.All, newMasterLife, newClientLife);
 
-        // O Master Client tambÈm anuncia que a carta atacou.
+        // O Master Client tamb√©m anuncia que a carta atacou.
         photonView.RPC("RPC_MarkCardAsAttacked", RpcTarget.All, attackerMatchID);
     }
     [PunRPC]
@@ -883,7 +911,7 @@ public class GameManager : MonoBehaviourPunCallbacks
             card.jaAtacouNesseTurno = true;
         }
 
-        // O jogador local que fez o ataque limpa sua referÍncia de 'attacker'.
+        // O jogador local que fez o ataque limpa sua refer√™ncia de 'attacker'.
         if (this.attacker != null && this.attacker.matchID == attackerMatchID)
         {
             this.attacker = null;

@@ -11,14 +11,14 @@ using UnityEngine.UI;
 // Usamos a interface IMatchmakingCallbacks para receber eventos do Photon
 public class ConnectionManager : MonoBehaviourPunCallbacks
 {
-    [Header("UI de Conex„o")]
+    [Header("UI de Conex√£o")]
     public TMP_InputField playerNameInput;
     public TextMeshProUGUI statusText;
     
 
     void Start()
     {
-        // Define um nome padr„o se nada for salvo
+        // Define um nome padr√£o se nada for salvo
         string defaultName = "Jogador" + Random.Range(1000, 9999);
         playerNameInput.text = PlayerPrefs.GetString("PlayerName", defaultName);
         statusText.text = "Desconectado";
@@ -32,19 +32,19 @@ public class ConnectionManager : MonoBehaviourPunCallbacks
             return;
         }
 
-        // Salva o nome do jogador para a prÛxima vez
+        // Salva o nome do jogador para a pr√≥xima vez
         PlayerPrefs.SetString("PlayerName", playerNameInput.text);
         PhotonNetwork.NickName = playerNameInput.text;
 
-        // --- AQUI EST¡ A CORRE«√O CRUCIAL ---
-        // Ativamos a sincronizaÁ„o de cena autom·tica para esta sess„o.
+        // --- AQUI EST√Å A CORRE√á√ÉO CRUCIAL ---
+        // Ativamos a sincroniza√ß√£o de cena autom√°tica para esta sess√£o.
         PhotonNetwork.AutomaticallySyncScene = true;
 
         statusText.text = "Conectando...";
         PhotonNetwork.ConnectUsingSettings();
     }
 
-    // --- Callbacks do Photon (funÁıes chamadas automaticamente pelo Photon) ---
+    // --- Callbacks do Photon (fun√ß√µes chamadas automaticamente pelo Photon) ---
 
     public override void OnConnectedToMaster()
     {
@@ -68,7 +68,7 @@ public class ConnectionManager : MonoBehaviourPunCallbacks
        
         if (chosenActionCard == null)
         {
-            // Adicione referÍncias ao DeckManager e ao CardDatabase se precisar de fallback
+            // Adicione refer√™ncias ao DeckManager e ao CardDatabase se precisar de fallback
             Debug.LogWarning("Nenhuma ActionCard encontrada no GameData. Usando fallback (se configurado).");
         }
 
@@ -76,17 +76,21 @@ public class ConnectionManager : MonoBehaviourPunCallbacks
         Hashtable playerProps = new Hashtable();
         if (chosenActionCard != null)
         {
-            playerProps.Add("ActionCardName", chosenActionCard.name);
+            playerProps.Add("ActionCardName", chosenActionCard.cardName);
         }
         if (chosenDeck != null && chosenDeck.Count > 0)
         {
             playerProps.Add("DeckCardNames", chosenDeck.Select(c => c.cardName).ToArray());
         }
+        else
+        {
+            playerProps.Add("DeckCardNames", new string[0]);
+        }
         PhotonNetwork.LocalPlayer.SetCustomProperties(playerProps);
 
         // --- ETAPA DE CARREGAMENTO DE CENA ---
         // Apenas o Master Client tem a autoridade para carregar a cena,
-        // e ele sÛ faz isso quando a sala estiver cheia.
+        // e ele s√≥ faz isso quando a sala estiver cheia.
         if (PhotonNetwork.CurrentRoom.PlayerCount == 2 && PhotonNetwork.IsMasterClient)
         {
             Debug.Log("Sala cheia! Carregando a cena de jogo para todos...");
@@ -103,10 +107,10 @@ public class ConnectionManager : MonoBehaviourPunCallbacks
         // Se a sala ficou cheia, o jogador mestre (o primeiro que entrou) carrega a cena.
         if (PhotonNetwork.CurrentRoom.PlayerCount == 2 && PhotonNetwork.IsMasterClient)
         {
-            Debug.Log("Sala cheia! Master Client est· carregando a cena 'Game' para todos.");
+            Debug.Log("Sala cheia! Master Client est√° carregando a cena 'Game' para todos.");
 
-            // ...eu carrego a cena do jogo. Como AutomaticallySyncScene È true,
-            // o Jogador 2 tambÈm carregar· a cena.
+            // ...eu carrego a cena do jogo. Como AutomaticallySyncScene √© true,
+            // o Jogador 2 tamb√©m carregar√° a cena.
             PhotonNetwork.LoadLevel("Game");
         }
     }

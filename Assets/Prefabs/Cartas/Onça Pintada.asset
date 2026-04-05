@@ -1,0 +1,29 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b083081b20f14b04d875cea77557fb9f, type: 3}
+  m_Name: "On\xE7a Pintada"
+  m_EditorClassIdentifier: 
+  cardName: "On\xE7a Pintada"
+  type: 0
+  description: Provocar
+  cost: 3
+  attack: 50
+  health: 40
+  classe: 1
+  ordem: 1
+  cardArt: {fileID: 8389134475083476877, guid: eff605de8258d5942815c24677227ec2, type: 3}
+  ability: {fileID: 0}
+  activateInHand: 1
+  activateInField: 1
+  hasTaunt: 1
+  battlecryAbility: {fileID: 0}
+  deathrattleAbility: {fileID: 0}

@@ -1,0 +1,5 @@
+Habilidades chave:
+Provocar (Taunt): Inimigos devem atacar criaturas com "Provocar" antes de poderem atacar outras criaturas ou o jogador.
+Investida (Rush/Charge): Permite que a criatura ataque no mesmo na zona de suporte.
+Último Suspiro (Deathrattle): Ativa uma habilidade quando a criatura é destruída e enviada ao cemitério.
+Grito de Guerra (Battlecry): Ativa uma habilidade quando a carta é jogada da mão.

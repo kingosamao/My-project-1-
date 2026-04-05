@@ -1,0 +1,29 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b083081b20f14b04d875cea77557fb9f, type: 3}
+  m_Name: Abelha Africanizada
+  m_EditorClassIdentifier: 
+  cardName: Abelha Africanizada
+  type: 0
+  description: BattleCry - de 20 de dano a um animal do oponente.
+  cost: 3
+  attack: 30
+  health: 10
+  classe: 3
+  ordem: 8
+  cardArt: {fileID: -8380096941969079548, guid: 53d3db7674b5e774cad51675f49f7a0c, type: 3}
+  ability: {fileID: 0}
+  activateInHand: 0
+  activateInField: 0
+  hasTaunt: 0
+  battlecryAbility: {fileID: 11400000, guid: 63cbc5c89c1858e459ba2e0099373449, type: 2}
+  deathrattleAbility: {fileID: 0}

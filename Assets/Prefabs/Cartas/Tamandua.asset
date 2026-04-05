@@ -1,0 +1,30 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b083081b20f14b04d875cea77557fb9f, type: 3}
+  m_Name: Tamandua
+  m_EditorClassIdentifier: 
+  cardName: Tamandua
+  type: 0
+  description: BattleCry - Aumente o atque de um animal da classe mammalia em em
+    50
+  cost: 2
+  attack: 0
+  health: 50
+  classe: 1
+  ordem: 6
+  cardArt: {fileID: 7680820834086852892, guid: 787ec75e0824c5d4ab6ae5b8419a5516, type: 3}
+  ability: {fileID: 0}
+  activateInHand: 0
+  activateInField: 0
+  hasTaunt: 0
+  battlecryAbility: {fileID: 11400000, guid: 25911a411cb9f3e4ea29138fed281946, type: 2}
+  deathrattleAbility: {fileID: 0}

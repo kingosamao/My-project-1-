@@ -1,0 +1,29 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b083081b20f14b04d875cea77557fb9f, type: 3}
+  m_Name: Piranha
+  m_EditorClassIdentifier: 
+  cardName: Piranha
+  type: 0
+  description: 'Deathrattle: de 20 de dano a um animal do oponente.'
+  cost: 1
+  attack: 30
+  health: 10
+  classe: 4
+  ordem: 7
+  cardArt: {fileID: 6660783624410144326, guid: bf5dce0b3afdb64428481d2876129c8c, type: 3}
+  ability: {fileID: 0}
+  activateInHand: 0
+  activateInField: 0
+  hasTaunt: 0
+  battlecryAbility: {fileID: 0}
+  deathrattleAbility: {fileID: 11400000, guid: 63cbc5c89c1858e459ba2e0099373449, type: 2}

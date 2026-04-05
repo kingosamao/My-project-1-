@@ -1,0 +1,29 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b083081b20f14b04d875cea77557fb9f, type: 3}
+  m_Name: Agua fresca
+  m_EditorClassIdentifier: 
+  cardName: Agua Fresa
+  type: 1
+  description: aumenta o ataque de um animal da classe mamalia em 10
+  cost: 2
+  attack: 0
+  health: 0
+  classe: 0
+  ordem: 0
+  cardArt: {fileID: -5099292496197868168, guid: 4abf66659e7c9e34786ee681b699fd84, type: 3}
+  ability: {fileID: 11400000, guid: 7308ccb3d57c15e4e967329f304b2f23, type: 2}
+  activateInHand: 0
+  activateInField: 0
+  hasTaunt: 0
+  battlecryAbility: {fileID: 0}
+  deathrattleAbility: {fileID: 0}

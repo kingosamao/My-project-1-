@@ -1,0 +1,9 @@
+Implementação no visual:
+Log de Ações: Um pequeno painel no canto da tela que registra os últimos eventos: "Jogador invocou Tatu-Bola", "Tatu-Bola atacou Onça-Pintada", "Oponente usou Chuva Ácida". Isso ajuda a entender o que aconteceu, especialmente no turno da IA.
+Indicadores de Turno e Fase Mais Claros: Em vez de apenas texto, mostre um banner grande que desliza na tela no início do turno ("SEU TURNO!") ou da fase ("FASE DE BATALHA").
+
+- A vida do jogador é definida pela sua carta de ação.
+- animais atacados na attack zone só retaliam se sobreviverem ao ataque
+
+Funcionalidade Multiplayer Online:
+Esta é a etapa mais complexa. Envolve aprender sobre bibliotecas de rede como Photon (PUN 2) ou a solução da própria Unity, Netcode for GameObjects. Você precisaria sincronizar o estado do jogo (quais cartas estão na mão, no campo, a vida dos jogadores, etc.) entre dois ou mais clientes.
